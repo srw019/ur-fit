@@ -10,6 +10,7 @@ import {
   CircularProgress,
   Button,
 } from "@mui/material"
+import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import { getChallengeById } from "../services/api"
 import Navbar from "../components/Navbar"
 
@@ -56,15 +57,37 @@ const ChallengeDetails = () => {
     const fetchChallenge = async () => {
       setLoading(true)
       try {
-        const challenge = await getChallengeById(id)
+        const challenge = await getChallengeById(id, token)
         setChallenge(challenge)
       } catch (err) {
+        console.error("Error fetching challenge:", err)
         setChallenge(null)
       }
       setLoading(false)
     }
     fetchChallenge()
-  }, [id])
+  }, [id, token])
+
+  // Helper function to parse YYYY-MM-DD string as local date (not UTC)
+  const parseLocalDate = (dateString) => {
+    if (!dateString) return null
+    // Extract just the date part (YYYY-MM-DD) from ISO string if needed
+    const datePart = dateString.split('T')[0]
+    const [year, month, day] = datePart.split('-').map(Number)
+    return new Date(year, month - 1, day)
+  }
+
+  // Helper function to format date to display format
+  const formatDate = (dateString) => {
+    if (!dateString) return ""
+    const date = parseLocalDate(dateString)
+    if (!date) return ""
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+  }
 
   // Handle logout and redirect to login
   const handleLogout = () => {
@@ -106,6 +129,24 @@ const ChallengeDetails = () => {
     <div style={{ minHeight: "100vh", backgroundColor: "#f9f9f9" }}>
       {/* Top navigation bar */}
       <Navbar user={user} onLogout={handleLogout} />
+      {/* Back button */}
+      <Box sx={{ pl: 2, pt: 2 }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate("/challenges")}
+          sx={{
+            color: "#000",
+            textTransform: "none",
+            fontSize: "16px",
+            fontWeight: 500,
+            "&:hover": {
+              backgroundColor: "rgba(0, 0, 0, 0.05)",
+            },
+          }}
+        >
+          Back
+        </Button>
+      </Box>
       <Container sx={{ py: 6 }}>
         {/* Top: Image and Details */}
         <Box
@@ -137,9 +178,16 @@ const ChallengeDetails = () => {
             <Typography variant="body1" sx={{ mb: 2 }}>
               {challenge.longDescription}
             </Typography>
-            {/* Chips for duration and participant count */}
+            {/* Chips for dates and participant count */}
             <Box sx={{ mb: 2 }}>
-              <Chip label={`${challenge.totalDays} Days`} sx={{ mr: 2 }} />
+              <Chip
+                label={`Starts: ${formatDate(challenge.startDate)}`}
+                sx={{ mr: 2 }}
+              />
+              <Chip
+                label={`Ends: ${formatDate(challenge.endDate)}`}
+                sx={{ mr: 2 }}
+              />
               <Chip label={`${challenge.participantCount} Participants`} />
             </Box>
           </Box>

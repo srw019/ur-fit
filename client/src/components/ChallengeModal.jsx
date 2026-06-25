@@ -24,13 +24,23 @@ const ChallengeModal = ({ open, onClose, onCreate }) => {
     title: "",
     description: "",
     longDescription: "",
-    totalDays: "",
+    startDate: "",
+    endDate: "",
     imageUrl: "",
     externalLink: "",
     pdfs: "",
   })
   const [error, setError] = useState("")
   const [imageFile, setImageFile] = useState(null)
+
+  // Get today's date in YYYY-MM-DD format (local timezone)
+  const getTodayDate = () => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, "0")
+    const day = String(today.getDate()).padStart(2, "0")
+    return `${year}-${month}-${day}`
+  }
 
   // Handle text input changes
   const handleChange = (e) => {
@@ -48,6 +58,25 @@ const ChallengeModal = ({ open, onClose, onCreate }) => {
     setError("")
     let imageUrl = form.imageUrl
 
+    // Validate required fields
+    if (!form.title || !form.description || !form.startDate || !form.endDate) {
+      setError("Title, Description, Start Date, and End Date are required.")
+      return
+    }
+
+    // Validate start date is not before today
+    const today = getTodayDate()
+    if (form.startDate < today) {
+      setError("Start date cannot be before today.")
+      return
+    }
+
+    // Validate end date is after start date
+    if (form.endDate <= form.startDate) {
+      setError("End date must be after start date.")
+      return
+    }
+
     // Upload image if a file is selected
     if (imageFile) {
       const data = new FormData()
@@ -60,34 +89,33 @@ const ChallengeModal = ({ open, onClose, onCreate }) => {
       imageUrl = result.imageUrl
     }
 
-    // Validate required fields
-    if (!form.title || !form.description || !form.totalDays) {
-      setError("Title, Description, and Total Days are required.")
-      return
-    }
-
     // Call onCreate with the new challenge data
-    onCreate({
-      ...form,
-      imageUrl,
-      totalDays: Number(form.totalDays),
-      externalLink: form.externalLink
-        ? form.externalLink.split(",").map((l) => l.trim())
-        : [],
-      pdfs: form.pdfs ? form.pdfs.split(",").map((l) => l.trim()) : [],
-    })
+    try {
+      await onCreate({
+        ...form,
+        imageUrl,
+        externalLink: form.externalLink
+          ? form.externalLink.split(",").map((l) => l.trim())
+          : [],
+        pdfs: form.pdfs ? form.pdfs.split(",").map((l) => l.trim()) : [],
+      })
 
-    // Reset form and image file
-    setForm({
-      title: "",
-      description: "",
-      longDescription: "",
-      totalDays: "",
-      imageUrl: "",
-      externalLink: "",
-      pdfs: "",
-    })
-    setImageFile(null)
+      // Reset form and image file
+      setForm({
+        title: "",
+        description: "",
+        longDescription: "",
+        startDate: "",
+        endDate: "",
+        imageUrl: "",
+        externalLink: "",
+        pdfs: "",
+      })
+      setImageFile(null)
+    } catch (err) {
+      setError("Failed to create challenge. Please try again.")
+      console.error("Error:", err)
+    }
   }
 
   return (
@@ -135,15 +163,34 @@ const ChallengeModal = ({ open, onClose, onCreate }) => {
           value={form.longDescription}
           onChange={handleChange}
         />
-        {/* Total Days input */}
+        {/* Start Date input */}
         <TextField
           margin="normal"
-          label="Total Days"
-          name="totalDays"
-          type="number"
+          label="Start Date"
+          name="startDate"
+          type="date"
           fullWidth
-          value={form.totalDays}
+          value={form.startDate}
           onChange={handleChange}
+          inputProps={{
+            min: getTodayDate(),
+          }}
+          InputLabelProps={{ shrink: true }}
+          required
+        />
+        {/* End Date input */}
+        <TextField
+          margin="normal"
+          label="End Date"
+          name="endDate"
+          type="date"
+          fullWidth
+          value={form.endDate}
+          onChange={handleChange}
+          inputProps={{
+            min: form.startDate || getTodayDate(),
+          }}
+          InputLabelProps={{ shrink: true }}
           required
         />
         {/* Image upload input */}

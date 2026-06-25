@@ -12,15 +12,18 @@ exports.signup = async (req, res) => {
   const { name, email, password, role } = req.body
 
   try {
-    // Check if user already exists
-    const existingUser = await User.findOne({ email })
+    // Normalize email to lowercase for case-insensitive comparison
+    const normalizedEmail = email.toLowerCase()
+    
+    // Check if user already exists (case-insensitive)
+    const existingUser = await User.findOne({ email: normalizedEmail })
     if (existingUser)
       return res.status(400).json({ message: "Email already exists" })
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10)
-    // Create and save the new user
-    const user = new User({ name, email, password: hashedPassword, role })
+    // Create and save the new user with lowercase email
+    const user = new User({ name, email: normalizedEmail, password: hashedPassword, role })
 
     await user.save()
     res.status(201).json({ message: "Signup successful" })
@@ -34,11 +37,14 @@ exports.login = async (req, res) => {
   const { email, password } = req.body
 
   try {
-    // Find user by email
-    const user = await User.findOne({ email })
+    // Normalize email to lowercase for case-insensitive lookup
+    const normalizedEmail = email.toLowerCase()
+    
+    // Find user by email (case-insensitive)
+    const user = await User.findOne({ email: normalizedEmail })
     if (!user) return res.status(400).json({ message: "Invalid credentials" })
 
-    // Compare password
+    // Compare password (case-sensitive)
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" })

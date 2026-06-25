@@ -15,6 +15,7 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material"
+import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import {
   getChallengeById,
   updateSingleChallengeLink,
@@ -47,8 +48,51 @@ const CoordinatorManageChallenge = () => {
     title: "",
     description: "",
     longDescription: "",
+    startDate: "",
+    endDate: "",
   })
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+
+  // Helper function to parse YYYY-MM-DD string as local date (not UTC)
+  const parseLocalDate = (dateString) => {
+    if (!dateString) return null
+    // Extract just the date part (YYYY-MM-DD) from ISO string if needed
+    const datePart = dateString.split('T')[0]
+    const [year, month, day] = datePart.split('-').map(Number)
+    return new Date(year, month - 1, day)
+  }
+
+  // Helper function to format date to YYYY-MM-DD
+  const formatDate = (dateString) => {
+    if (!dateString) return ""
+    const date = parseLocalDate(dateString)
+    if (!date) return ""
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+  }
+
+  // Helper function to get YYYY-MM-DD format for input field
+  const getDateInputFormat = (dateString) => {
+    if (!dateString) return ""
+    const date = parseLocalDate(dateString)
+    if (!date) return ""
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
+    return `${year}-${month}-${day}`
+  }
+
+  // Helper function to get today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, "0")
+    const day = String(today.getDate()).padStart(2, "0")
+    return `${year}-${month}-${day}`
+  }
 
   // Decode user from JWT token if available
   try {
@@ -64,6 +108,8 @@ const CoordinatorManageChallenge = () => {
         title: challenge.title || "",
         description: challenge.description || "",
         longDescription: challenge.longDescription || "",
+        startDate: getDateInputFormat(challenge.startDate) || "",
+        endDate: getDateInputFormat(challenge.endDate) || "",
       })
     }
   }, [challenge])
@@ -89,15 +135,16 @@ const CoordinatorManageChallenge = () => {
     const fetchChallenge = async () => {
       setLoading(true)
       try {
-        const challenge = await getChallengeById(id)
+        const challenge = await getChallengeById(id, token)
         setChallenge(challenge)
       } catch (err) {
+        console.error("Error fetching challenge:", err)
         setChallenge(null)
       }
       setLoading(false)
     }
     fetchChallenge()
-  }, [id])
+  }, [id, token])
 
   // Logout handler
   const handleLogout = () => {
@@ -139,6 +186,24 @@ const CoordinatorManageChallenge = () => {
     <div style={{ minHeight: "100vh", backgroundColor: "#f9f9f9" }}>
       {/* Top navigation bar */}
       <Navbar user={user} onLogout={handleLogout} />
+      {/* Back button */}
+      <Box sx={{ pl: 2, pt: 2 }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate("/coordinator-challenges")}
+          sx={{
+            color: "#000",
+            textTransform: "none",
+            fontSize: "16px",
+            fontWeight: 500,
+            "&:hover": {
+              backgroundColor: "rgba(0, 0, 0, 0.05)",
+            },
+          }}
+        >
+          Back
+        </Button>
+      </Box>
       <Container sx={{ py: 6 }}>
         {/* Top: Image and Details */}
         <Box
@@ -199,6 +264,40 @@ const CoordinatorManageChallenge = () => {
                   minRows={3}
                   sx={{ mb: 2 }}
                 />
+                <TextField
+                  label="Start Date"
+                  type="date"
+                  value={editFields.startDate}
+                  onChange={(e) =>
+                    setEditFields({
+                      ...editFields,
+                      startDate: e.target.value,
+                    })
+                  }
+                  fullWidth
+                  inputProps={{
+                    min: getTodayDate(),
+                  }}
+                  InputLabelProps={{ shrink: true }}
+                  sx={{ mb: 2 }}
+                />
+                <TextField
+                  label="End Date"
+                  type="date"
+                  value={editFields.endDate}
+                  onChange={(e) =>
+                    setEditFields({
+                      ...editFields,
+                      endDate: e.target.value,
+                    })
+                  }
+                  fullWidth
+                  inputProps={{
+                    min: editFields.startDate || getTodayDate(),
+                  }}
+                  InputLabelProps={{ shrink: true }}
+                  sx={{ mb: 2 }}
+                />
                 {/* Save and Cancel buttons */}
                 <Button
                   variant="contained"
@@ -240,9 +339,16 @@ const CoordinatorManageChallenge = () => {
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   {challenge.longDescription}
                 </Typography>
-                {/* Chips for duration and participant count */}
+                {/* Chips for dates and participant count */}
                 <Box sx={{ mb: 2 }}>
-                  <Chip label={`${challenge.totalDays} Days`} sx={{ mr: 2 }} />
+                  <Chip
+                    label={`Starts: ${formatDate(challenge.startDate)}`}
+                    sx={{ mr: 2 }}
+                  />
+                  <Chip
+                    label={`Ends: ${formatDate(challenge.endDate)}`}
+                    sx={{ mr: 2 }}
+                  />
                   <Chip label={`${challenge.participantCount} Participants`} />
                 </Box>
                 <Divider />
@@ -289,17 +395,17 @@ const CoordinatorManageChallenge = () => {
               items={challenge.externalLink || []}
               onUpdate={async (idx, value) => {
                 await updateSingleChallengeLink(id, idx, value, token)
-                const updated = await getChallengeById(id)
+                const updated = await getChallengeById(id, token)
                 setChallenge(updated)
               }}
               onAdd={async (value) => {
                 await addChallengeLink(id, value, token)
-                const updated = await getChallengeById(id)
+                const updated = await getChallengeById(id, token)
                 setChallenge(updated)
               }}
               onDelete={async (idx) => {
                 await deleteSingleChallengeLink(id, idx, token)
-                const updated = await getChallengeById(id)
+                const updated = await getChallengeById(id, token)
                 setChallenge(updated)
               }}
               label=""
@@ -315,17 +421,17 @@ const CoordinatorManageChallenge = () => {
               items={challenge.pdfs || []}
               onUpdate={async (idx, value) => {
                 await updateSingleChallengePdf(id, idx, value, token)
-                const updated = await getChallengeById(id)
+                const updated = await getChallengeById(id, token)
                 setChallenge(updated)
               }}
               onAdd={async (value) => {
                 await addChallengePdf(id, value, token)
-                const updated = await getChallengeById(id)
+                const updated = await getChallengeById(id, token)
                 setChallenge(updated)
               }}
               onDelete={async (idx) => {
                 await deleteSingleChallengePdf(id, idx, token)
-                const updated = await getChallengeById(id)
+                const updated = await getChallengeById(id, token)
                 setChallenge(updated)
               }}
               label=""

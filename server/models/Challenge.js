@@ -23,9 +23,14 @@ const challengeSchema = new mongoose.Schema(
     longDescription: {
       type: String,
     },
-    // Duration in days (required)
-    totalDays: {
-      type: Number,
+    // Challenge start date (required)
+    startDate: {
+      type: Date,
+      required: true,
+    },
+    // Challenge end date (required)
+    endDate: {
+      type: Date,
       required: true,
     },
     // Array of participant user IDs (references User model)

@@ -75,11 +75,15 @@ const CoordinatorChallenges = () => {
   // Handle creation of a new challenge
   const handleCreateChallenge = async (challengeData) => {
     try {
-      await createChallenge(challengeData, token)
+      const response = await createChallenge(challengeData, token)
       setModalOpen(false)
       fetchChallenges()
     } catch (error) {
-      console.error("Error creating challenge:", error)
+      console.error("Error creating challenge:", error.response?.data || error.message)
+      alert(
+        "Error creating challenge: " +
+          (error.response?.data?.message || error.message)
+      )
     }
   }
 

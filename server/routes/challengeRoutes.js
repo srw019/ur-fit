@@ -24,20 +24,20 @@ const {
   deleteChallenge,
 } = require("../controllers/challengeController")
 
-// Create a new challenge (no auth required)
-router.post("/", createChallenge)
+// Create a new challenge (requires auth - coordinator only)
+router.post("/", auth, createChallenge)
 
 // Get all challenges
 router.get("/", getChallenges)
+
+// Get challenges joined by the current user (requires auth) - MUST come before /:id
+router.get("/joined/me", auth, getUserJoinedChallenges)
 
 // Get a challenge by ID
 router.get("/:id", getChallengeById)
 
 // Join a challenge (participant, requires auth)
 router.post("/:id/join", auth, joinChallenge)
-
-// Get challenges joined by the current user (requires auth)
-router.get("/joined/me", auth, getUserJoinedChallenges)
 
 // Enroll a user in a challenge (coordinator, requires auth)
 router.post("/enroll", auth, userEnrollment)

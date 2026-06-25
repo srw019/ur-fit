@@ -7,24 +7,75 @@
 const Challenge = require("../models/Challenge")
 const User = require("../models/User")
 
+// Helper function to parse YYYY-MM-DD string as local date (not UTC)
+const parseLocalDate = (dateString) => {
+  if (!dateString) return null
+  // Extract just the date part (YYYY-MM-DD) from ISO string if needed
+  const datePart = dateString.split('T')[0]
+  const [year, month, day] = datePart.split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+// Helper function to get today's date at midnight local time
+const getTodayLocal = () => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return today
+}
+
 // Create a new challenge
 exports.createChallenge = async (req, res) => {
   const {
     title,
     description,
     longDescription,
-    totalDays,
+    startDate,
+    endDate,
     imageUrl,
     externalLink,
     pdfs,
   } = req.body
 
   try {
+    // Validate required fields
+    if (!title || !description || !startDate || !endDate) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Title, description, startDate, and endDate are required",
+        })
+    }
+
+    // Parse dates as local dates (not UTC)
+    const today = getTodayLocal()
+    const start = parseLocalDate(startDate)
+    const end = parseLocalDate(endDate)
+
+    if (!start || !end) {
+      return res.status(400).json({ message: "Invalid date format" })
+    }
+
+    // Validate that startDate is not before today
+    if (start < today) {
+      return res
+        .status(400)
+        .json({ message: "Start date cannot be before today" })
+    }
+
+    // Validate that endDate is after startDate
+    if (end <= start) {
+      return res
+        .status(400)
+        .json({ message: "End date must be after start date" })
+    }
+
     const challenge = new Challenge({
       title,
       description,
       longDescription,
-      totalDays,
+      startDate: start,
+      endDate: end,
       imageUrl,
       externalLink,
       pdfs,
@@ -300,7 +351,7 @@ exports.deleteSingleChallengePdf = async (req, res) => {
 // Edit challenge details (title, description, longDescription)
 exports.editChallenge = async (req, res) => {
   const { id } = req.params;
-  const { title, description, longDescription } = req.body;
+  const { title, description, longDescription, startDate, endDate } = req.body;
 
   try {
     const challenge = await Challenge.findById(id);
@@ -311,6 +362,26 @@ exports.editChallenge = async (req, res) => {
     if (title !== undefined) challenge.title = title;
     if (description !== undefined) challenge.description = description;
     if (longDescription !== undefined) challenge.longDescription = longDescription;
+    
+    // Validate and update dates if provided
+    if (startDate !== undefined || endDate !== undefined) {
+      const start = startDate ? parseLocalDate(startDate) : parseLocalDate(challenge.startDate.toISOString());
+      const end = endDate ? parseLocalDate(endDate) : parseLocalDate(challenge.endDate.toISOString());
+
+      if (!start || !end) {
+        return res.status(400).json({ message: "Invalid date format" });
+      }
+
+      // Validate that endDate is after startDate
+      if (end <= start) {
+        return res
+          .status(400)
+          .json({ message: "End date must be after start date" });
+      }
+
+      if (startDate !== undefined) challenge.startDate = start;
+      if (endDate !== undefined) challenge.endDate = end;
+    }
 
     await challenge.save();
 

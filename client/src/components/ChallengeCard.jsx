@@ -22,6 +22,27 @@ const ChallengeCard = ({
       ? `/coordinator/challenges/${challenge._id}`
       : `/challenges/${challenge._id}`
 
+  // Helper function to parse YYYY-MM-DD string as local date (not UTC)
+  const parseLocalDate = (dateString) => {
+    if (!dateString) return null
+    // Extract just the date part (YYYY-MM-DD) from ISO string if needed
+    const datePart = dateString.split('T')[0]
+    const [year, month, day] = datePart.split('-').map(Number)
+    return new Date(year, month - 1, day)
+  }
+
+  // Helper function to format date
+  const formatDate = (dateString) => {
+    if (!dateString) return ""
+    const date = parseLocalDate(dateString)
+    if (!date) return ""
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+  }
+
   return (
     <Card
       style={{
@@ -95,10 +116,10 @@ const ChallengeCard = ({
             borderTop: "1px solid #f0f0f0",
           }}
         >
-          {/* Chips for duration and participant count */}
+          {/* Chips for dates and participant count */}
           <div style={{ display: "flex", gap: "8px" }}>
             <Chip
-              label={`${challenge.totalDays} Days`}
+              label={`${formatDate(challenge.startDate)}`}
               style={{ fontSize: "12px" }}
             />
             <Chip

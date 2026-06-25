@@ -255,26 +255,24 @@ const Challenges = () => {
                   </p>
                 </div>
               ) : (
-                // Show only challenges not already joined
-                filteredAllChallenges
-                  .filter((challenge) => !isJoined(challenge._id))
-                  .map((challenge) =>
-                    useExpandedView ? (
-                      <ExpandedChallengeCard
-                        key={challenge._id}
-                        challenge={challenge}
-                        isJoined={isJoined(challenge._id)}
-                        onJoin={handleJoin}
-                      />
-                    ) : (
-                      <ChallengeCard
-                        key={challenge._id}
-                        challenge={challenge}
-                        isJoined={isJoined(challenge._id)}
-                        onJoin={handleJoin}
-                      />
-                    )
+                // Show all challenges, including joined ones
+                filteredAllChallenges.map((challenge) =>
+                  useExpandedView ? (
+                    <ExpandedChallengeCard
+                      key={challenge._id}
+                      challenge={challenge}
+                      isJoined={isJoined(challenge._id)}
+                      onJoin={handleJoin}
+                    />
+                  ) : (
+                    <ChallengeCard
+                      key={challenge._id}
+                      challenge={challenge}
+                      isJoined={isJoined(challenge._id)}
+                      onJoin={handleJoin}
+                    />
                   )
+                )
               )
             ) : filteredJoinedChallenges.length === 0 ? (
               // My Challenges tab, but no joined challenges
