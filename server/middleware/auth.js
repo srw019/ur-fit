@@ -1,6 +1,5 @@
 /**
  * auth.js
- * -------
  * check the JWT token and attach user info to requests.
  */
 
