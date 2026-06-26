@@ -1,7 +1,7 @@
 /**
  * challengeRoutes.js
  * ------------------
- * Defines all challenge-related routes for the UR Fit backend.
+ * Routes for challenge-related API calls.
  */
 
 const express = require("express")

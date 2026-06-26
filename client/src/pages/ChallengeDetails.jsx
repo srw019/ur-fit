@@ -29,14 +29,14 @@ const ChallengeDetails = () => {
   const token = localStorage.getItem("token")
   let user = null
 
-  // Decode user from JWT token if available
+  // Try to read the logged-in user from the token
   try {
     if (token) user = jwtDecode(token)
   } catch {
     user = null
   }
 
-  // Redirect to login if not authenticated or not a participant
+  // If you're not logged in or not a participant, bounce to login
   useEffect(() => {
     if (!token) {
       navigate("/login")
@@ -52,7 +52,7 @@ const ChallengeDetails = () => {
     }
   }, [token, navigate])
 
-  // Fetch challenge data by ID
+  // Load the challenge details when the page opens
   useEffect(() => {
     const fetchChallenge = async () => {
       setLoading(true)

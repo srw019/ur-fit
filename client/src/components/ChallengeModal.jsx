@@ -53,25 +53,25 @@ const ChallengeModal = ({ open, onClose, onCreate }) => {
     setImageFile(e.target.files[0])
   }
 
-  // Handle form submission
+  // Send the form to the server when user clicks create
   const handleSubmit = async () => {
     setError("")
     let imageUrl = form.imageUrl
 
-    // Validate required fields
+    // Check the required fields first
     if (!form.title || !form.description || !form.startDate || !form.endDate) {
       setError("Title, Description, Start Date, and End Date are required.")
       return
     }
 
-    // Validate start date is not before today
+    // Make sure start isn't in the past
     const today = getTodayDate()
     if (form.startDate < today) {
       setError("Start date cannot be before today.")
       return
     }
 
-    // Validate end date is after start date
+    // End needs to be after start
     if (form.endDate <= form.startDate) {
       setError("End date must be after start date.")
       return

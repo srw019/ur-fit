@@ -1,7 +1,8 @@
 /**
  * server.js
  * ---------
- * Main entry point for the UR Fit backend server.
+ * Main backend server file for UR Fit.
+ * Starts Express, hooks up routes and static files.
  */
 
 const express = require("express")

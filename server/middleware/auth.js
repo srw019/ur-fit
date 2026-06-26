@@ -1,7 +1,7 @@
 /**
  * auth.js
  * -------
- * Express middleware for JWT authentication in the UR Fit backend.
+ * check the JWT token and attach user info to requests.
  */
 
 const jwt = require("jsonwebtoken")

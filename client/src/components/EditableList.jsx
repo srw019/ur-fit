@@ -6,7 +6,7 @@ import DeleteIcon from "@mui/icons-material/Delete"
 /**
  * EditableList Component
  * ----------------------
- * Renders an editable list of items (links, PDFs, etc.) with add, edit, and delete functionality.
+ * Editable list UI for links, PDFs, or other items.
  */
 
 const EditableList = ({

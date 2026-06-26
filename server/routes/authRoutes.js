@@ -1,7 +1,7 @@
 /**
  * authRoutes.js
  * -------------
- * Defines authentication-related routes for the UR Fit backend.
+ * Auth routes for signup and login.
  */
 
 const express = require('express');

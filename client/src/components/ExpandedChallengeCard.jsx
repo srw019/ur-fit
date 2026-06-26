@@ -5,7 +5,7 @@ import { Button, Chip, Divider } from "@mui/material"
 /**
  * ExpandedChallengeCard Component
  * -------------------------------
- * Displays a detailed, horizontally-oriented card for a challenge.
+ * Bigger challenge card with more description and action button.
  */
 
 const ExpandedChallengeCard = ({

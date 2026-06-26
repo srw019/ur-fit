@@ -5,8 +5,8 @@ import { Button, Card, CardContent, Typography, Chip } from "@mui/material"
 /**
  * ChallengeCard Component
  * -----------------------
- * Displays a summary card for a challenge, including image, title, description,
- * duration, participant count, and a join/edit button.
+ * Small summary card for a challenge.
+ * Shows title, description, dates, participants, and the action button.
  */
 
 const ChallengeCard = ({

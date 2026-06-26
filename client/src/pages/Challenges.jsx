@@ -82,7 +82,8 @@ const Challenges = () => {
         challenge.description.toLowerCase().includes(search.toLowerCase()))
   )
 
-  // On mount: check auth, redirect if needed, and fetch data
+  // When the page loads, make sure this is a logged-in participant
+  // then get both full challenge list and the joined list.
   useEffect(() => {
     if (!user) {
       navigate("/login")

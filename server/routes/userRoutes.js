@@ -1,7 +1,7 @@
 /**
  * userRoutes.js
  * -------------
- * Defines user-related routes for the UR Fit backend.
+ * Routes for user lookup and coordinator user management.
  */
 
 const express = require("express")

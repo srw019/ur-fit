@@ -1,7 +1,7 @@
 /**
  * db.js
  * -----
- * MongoDB connection configuration for the UR Fit backend.
+ * Handles connecting to MongoDB from the backend.
  */
 
 const mongoose = require('mongoose');

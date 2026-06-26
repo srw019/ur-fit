@@ -5,7 +5,7 @@ import { Link } from "react-router-dom"
 /**
  * Home Page
  * ---------
- * Displays the landing page for UR Fit.
+ * Landing page for UR Fit.
  */
 
 const Home = () => {

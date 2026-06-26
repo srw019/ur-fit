@@ -5,7 +5,7 @@ import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material"
 /**
  * Navbar Component
  * ----------------
- * Displays the top navigation bar for the UR Fit app.
+ * Shows the top navigation bar and links for the app.
  */
 
 const Navbar = ({ user, onLogout }) => {

@@ -37,7 +37,7 @@ const CoordinatorChallenges = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const [search, setSearch] = useState("")
 
-  // On mount: check auth, redirect if needed, and fetch challenges
+  // On load: only let coordinators stay here, otherwise send them away.
   useEffect(() => {
     if (!user) {
       navigate("/login")

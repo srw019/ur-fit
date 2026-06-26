@@ -1,7 +1,7 @@
 /**
  * challengeController.js
  * ----------------------
- * Controller functions for managing wellness challenges in the UR Fit backend.
+ * Logic for challenge creation, editing, joining, and lookup.
  */
 
 const Challenge = require("../models/Challenge")

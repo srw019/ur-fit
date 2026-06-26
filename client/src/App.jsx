@@ -12,7 +12,7 @@ import EnrollUser from "./pages/EnrollUser"
 /**
  * App.jsx
  * -------
- * The main entry point for the UR Fit React application.
+ * Main entry point for the UR Fit.
  */
 
 const App = () => {

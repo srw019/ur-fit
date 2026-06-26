@@ -1,7 +1,7 @@
 /**
  * authController.js
  * -----------------
- * Controller functions for authentication and user management in the UR Fit backend.
+ * Auth logic for signup, login, and user lookup.
  */
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
