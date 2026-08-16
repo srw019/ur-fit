@@ -17,10 +17,11 @@ import {
   Box,
 } from "@mui/material"
 import MuiAlert from "@mui/material/Alert"
+import ArrowBackIcon from "@mui/icons-material/ArrowBack"
 import {
   getAllUsers,
   getAllChallenges,
-  userEnrollment,
+  inviteUser,
   getChallengeById,
 } from "../services/api"
 import Navbar from "../components/Navbar"
@@ -37,6 +38,7 @@ const EnrollUser = () => {
   const [challenges, setChallenges] = useState([])
   const [selectedChallenge, setSelectedChallenge] = useState("")
   const [enrolledUserIds, setEnrolledUserIds] = useState([])
+  const [invitationStatus, setInvitationStatus] = useState({})
   const [search, setSearch] = useState("")
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -93,23 +95,41 @@ const EnrollUser = () => {
   // Fetch enrolled user IDs when selected challenge changes
   useEffect(() => {
     if (selectedChallenge) {
-      getChallengeById(selectedChallenge, token)
-        .then((challenge) => {
-          const ids = Array.isArray(challenge.participants)
-            ? challenge.participants.map((u) =>
-                typeof u === "string" ? u : String(u._id)
-              )
-            : []
-          setEnrolledUserIds(ids)
-        })
-        .catch(() => setEnrolledUserIds([]))
+      let mounted = true
+      const fetchData = () =>
+        getChallengeById(selectedChallenge, token)
+          .then((challenge) => {
+            if (!mounted) return
+            const ids = Array.isArray(challenge.participants)
+              ? challenge.participants.map((u) =>
+                  typeof u === "string" ? u : String(u._id)
+                )
+              : []
+            setEnrolledUserIds(ids)
+
+            const invMap = {}
+            if (Array.isArray(challenge.invitations)) {
+              challenge.invitations.forEach((i) => {
+                invMap[String(i.user)] = i.status
+              })
+            }
+            setInvitationStatus(invMap)
+          })
+          .catch(() => setEnrolledUserIds([]))
+
+      fetchData()
+      const iv = setInterval(fetchData, 5000)
+      return () => {
+        mounted = false
+        clearInterval(iv)
+      }
     } else {
       setEnrolledUserIds([])
     }
   }, [selectedChallenge, token])
 
-  // Handle enrolling a user in the selected challenge
-  const handleEnroll = (userId) => {
+  // Handle inviting a user in the selected challenge
+  const handleInvite = (userId) => {
     if (!selectedChallenge) {
       setSnackbar({
         open: true,
@@ -118,34 +138,40 @@ const EnrollUser = () => {
       })
       return
     }
-    userEnrollment({ userId, challengeId: selectedChallenge }, token)
+      inviteUser(selectedChallenge, userId, token)
       .then((res) => {
         setSnackbar({
           open: true,
-          message: res.data.message || "Enrolled!",
+          message: res.data.message || "Invitation sent!",
           severity: "success",
         })
-        // Refresh enrolled user IDs after enrollment
+        // Refresh challenge data
         return getChallengeById(selectedChallenge, token)
       })
       .then((challenge) => {
         const ids = Array.isArray(challenge.participants)
-          ? challenge.participants.map((u) =>
-              typeof u === "string" ? u : String(u._id)
-            )
+          ? challenge.participants.map((u) => (typeof u === "string" ? u : String(u._id)))
           : []
         setEnrolledUserIds(ids)
+
+        const invMap = {}
+        if (Array.isArray(challenge.invitations)) {
+          challenge.invitations.forEach((i) => {
+            invMap[String(i.user)] = i.status
+          })
+        }
+        setInvitationStatus(invMap)
       })
       .catch((err) =>
         setSnackbar({
           open: true,
-          message:
-            err.response?.data?.message ||
-            "Enrollment failed. User may already be enrolled.",
+          message: err.response?.data?.message || "Invite failed.",
           severity: "error",
         })
       )
   }
+
+  const handleCancelInvite = (userId) => {}
 
   // Filter users by search input
   const filteredUsers = users.filter(
@@ -158,10 +184,26 @@ const EnrollUser = () => {
     <div>
       {/* Top navigation bar */}
       <Navbar user={user} onLogout={handleLogout} />
+      {/* Back button */}
+      <Box sx={{ pl: 2, pt: 2 }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate(-1)}
+          sx={{
+            color: "#000",
+            textTransform: "none",
+            fontSize: "16px",
+            fontWeight: 500,
+            "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.05)" },
+          }}
+        >
+          Back
+        </Button>
+      </Box>
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Page title */}
         <Typography variant="h4" fontWeight={700} sx={{ mb: 3 }}>
-          User Enrollment
+          Invite Users
         </Typography>
         {/* Search bar and challenge select dropdown */}
         <Box display="flex" gap={2} mb={3} alignItems="center" flexWrap="wrap">
@@ -212,14 +254,23 @@ const EnrollUser = () => {
                 <TableCell>{user.name}</TableCell>
                 <TableCell>{user.email}</TableCell>
                 <TableCell>
-                  {/* Show Enrolled or Enroll button */}
-                  {enrolledUserIds.includes(String(user._id)) ? (
+                  {invitationStatus[String(user._id)] ? (
+                    invitationStatus[String(user._id)] === "pending" ? (
+                      <span style={{ color: "#f57c00" }}>Pending</span>
+                    ) : invitationStatus[String(user._id)] === "accepted" ? (
+                      <span style={{ color: "#1976d2" }}>Accepted</span>
+                    ) : invitationStatus[String(user._id)] === "rejected" ? (
+                      <span style={{ color: "#9e9e9e" }}>Rejected</span>
+                    ) : (
+                      <span style={{ textTransform: "capitalize" }}>{invitationStatus[String(user._id)]}</span>
+                    )
+                  ) : enrolledUserIds.includes(String(user._id)) ? (
                     <span style={{ color: "#4caf50" }}>Enrolled</span>
                   ) : (
                     <Button
                       variant="contained"
                       size="small"
-                      onClick={() => handleEnroll(user._id)}
+                      onClick={() => handleInvite(user._id)}
                       sx={{
                         backgroundColor: "#000",
                         color: "#fff",
@@ -227,7 +278,7 @@ const EnrollUser = () => {
                         "&:hover": { backgroundColor: "#333" },
                       }}
                     >
-                      Enroll
+                      Invite
                     </Button>
                   )}
                 </TableCell>

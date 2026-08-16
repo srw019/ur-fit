@@ -14,6 +14,11 @@ const {
   joinChallenge,
   getUserJoinedChallenges,
   userEnrollment,
+  inviteUser,
+  getChallengeInvitations,
+  acceptInvitation,
+  rejectInvitation,
+  getUserInvitations,
   addChallengeLink,
   updateSingleChallengeLink,
   updateSingleChallengePdf,
@@ -22,7 +27,22 @@ const {
   deleteSingleChallengePdf,
   editChallenge,
   deleteChallenge,
+  submitDailyLog,
+  getUserChallengeLogs,
+  leaveChallenge,
+  getChallengeLeaderboard,
 } = require("../controllers/challengeController")
+
+// Invite user to a challenge (coordinator)
+router.post("/:id/invite", auth, inviteUser)
+
+// Get invitations for a challenge (coordinator)
+router.get("/:id/invitations", auth, getChallengeInvitations)
+
+// Participant accepts/rejects invitations
+router.post("/:id/invitations/accept", auth, acceptInvitation)
+router.post("/:id/invitations/reject", auth, rejectInvitation)
+// cancel invitation route removed
 
 // Create a new challenge (requires auth - coordinator only)
 router.post("/", auth, createChallenge)
@@ -34,10 +54,20 @@ router.get("/", getChallenges)
 router.get("/joined/me", auth, getUserJoinedChallenges)
 
 // Get a challenge by ID
+router.get("/:id/leaderboard", auth, getChallengeLeaderboard)
 router.get("/:id", getChallengeById)
 
 // Join a challenge (participant, requires auth)
 router.post("/:id/join", auth, joinChallenge)
+
+// Leave a challenge (participant, requires auth)
+router.post("/:id/leave", auth, leaveChallenge)
+
+// Submit a daily activity log for a joined challenge
+router.post("/:id/log", auth, submitDailyLog)
+
+// Get current user's logs for a challenge
+router.get("/:id/logs/me", auth, getUserChallengeLogs)
 
 // Enroll a user in a challenge (coordinator, requires auth)
 router.post("/enroll", auth, userEnrollment)

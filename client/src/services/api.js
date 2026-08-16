@@ -33,6 +33,32 @@ export const joinChallenge = (challengeId, token) =>
     { headers: { Authorization: `Bearer ${token}` } }
   )
 
+// Leave a challenge
+export const leaveChallenge = (challengeId, token) =>
+  API.post(
+    `/challenges/${challengeId}/leave`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } }
+  )
+
+// Submit today's activity log for a challenge
+export const submitChallengeLog = (challengeId, data, token) =>
+  API.post(`/challenges/${challengeId}/log`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+
+// Get current user's logs for a challenge
+export const getChallengeLogs = (challengeId, token) =>
+  API.get(`/challenges/${challengeId}/logs/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+
+// Get challenge-specific leaderboard
+export const getChallengeLeaderboard = (challengeId, token) =>
+  API.get(`/challenges/${challengeId}/leaderboard`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+
 // Create a new challenge
 export const createChallenge = (challengeData, token) =>
   API.post("/challenges", challengeData, {
@@ -54,6 +80,44 @@ export const userEnrollment = (data, token) =>
   API.post("/challenges/enroll", data, {
     headers: { Authorization: `Bearer ${token}` },
   })
+
+// Invite a user to a challenge (coordinator)
+export const inviteUser = (challengeId, userId, token) =>
+  API.post(
+    `/challenges/${challengeId}/invite`,
+    { userId },
+    { headers: { Authorization: `Bearer ${token}` } }
+  )
+
+// Get invitations for a challenge (coordinator)
+export const getChallengeInvitations = (challengeId, token) =>
+  API.get(`/challenges/${challengeId}/invitations`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+
+// Get current user's invitations
+export const getUserInvitations = (token) =>
+  API.get(`/users/me/invitations`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+
+// Accept / reject invitations (participant)
+export const acceptInvitation = (challengeId, token) =>
+  API.post(
+    `/challenges/${challengeId}/invitations/accept`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } }
+  )
+
+export const rejectInvitation = (challengeId, token) =>
+  API.post(
+    `/challenges/${challengeId}/invitations/reject`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } }
+  )
+
+// Cancel a pending invitation (coordinator)
+// cancel invitation helper removed
 
 // Get all users (for coordinators)
 export const getAllUsers = (token) =>
@@ -114,14 +178,18 @@ export const deleteSingleChallengePdf = (id, index, token) =>
   })
 
 // Edit challenge details
-export const editChallenge = async (id, data, token) =>
-  axios.put(`/api/challenges/${id}/edit`, data, {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+export const editChallenge = (id, data, token) =>
+  API.put(
+    `/challenges/${id}/edit`,
+    data,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  )
 
 // Delete a challenge
-export const deleteChallenge = async (id, token) =>
-  axios.delete(`/api/challenges/${id}`, {
+export const deleteChallenge = (id, token) =>
+  API.delete(`/challenges/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
 

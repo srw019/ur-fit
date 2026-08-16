@@ -29,6 +29,7 @@ const ChallengeModal = ({ open, onClose, onCreate }) => {
     imageUrl: "",
     externalLink: "",
     pdfs: "",
+    pointsPerLog: "",
   })
   const [error, setError] = useState("")
   const [imageFile, setImageFile] = useState(null)
@@ -223,6 +224,18 @@ const ChallengeModal = ({ open, onClose, onCreate }) => {
           value={form.pdfs}
           onChange={handleChange}
           placeholder="https://example.com/file.pdf"
+        />
+        {/* Points Per Log input */}
+        <TextField
+          margin="normal"
+          label="Points Per Log"
+          name="pointsPerLog"
+          type="number"
+          fullWidth
+          value={form.pointsPerLog}
+          onChange={handleChange}
+          placeholder="10"
+          InputProps={{ inputProps: { min: 0 } }}
         />
         {/* Error message */}
         {error && (

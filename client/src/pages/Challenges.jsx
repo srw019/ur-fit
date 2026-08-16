@@ -42,10 +42,20 @@ const Challenges = () => {
     severity: "success",
   })
 
+  const isTokenExpired = (tokenToCheck) => {
+    if (!tokenToCheck) return true
+    try {
+      const decodedToken = jwtDecode(tokenToCheck)
+      return decodedToken.exp && decodedToken.exp * 1000 < Date.now()
+    } catch {
+      return true
+    }
+  }
+
   // Decode user from JWT token if available
   let user = null
   try {
-    if (token) user = jwtDecode(token)
+    if (token && !isTokenExpired(token)) user = jwtDecode(token)
   } catch {
     user = null
   }
@@ -53,17 +63,37 @@ const Challenges = () => {
   // Fetch all challenges from API
   const fetchAll = async () => {
     setLoading(true)
-    const res = await getAllChallenges(token)
-    setAllChallenges(res.data)
-    setLoading(false)
+    try {
+      const res = await getAllChallenges(token)
+      setAllChallenges(res.data)
+    } catch (err) {
+      console.error("Error fetching all challenges:", err)
+      if (err?.response?.status === 401) {
+        localStorage.removeItem("token")
+        navigate("/login")
+        return
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Fetch joined challenges from API
   const fetchJoined = async () => {
     setLoading(true)
-    const res = await getJoinedChallenges(token)
-    setJoinedChallenges(res.data)
-    setLoading(false)
+    try {
+      const res = await getJoinedChallenges(token)
+      setJoinedChallenges(res.data)
+    } catch (err) {
+      console.error("Error fetching joined challenges:", err)
+      if (err?.response?.status === 401) {
+        localStorage.removeItem("token")
+        navigate("/login")
+        return
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Filter all challenges by search input
@@ -99,14 +129,30 @@ const Challenges = () => {
 
   // Handle joining a challenge
   const handleJoin = async (challengeId) => {
-    await joinChallenge(challengeId, token)
-    setSnackbar({
-      open: true,
-      message: "Successfully joined the challenge!",
-      severity: "success",
-    })
-    fetchAll()
-    fetchJoined()
+    try {
+      await joinChallenge(challengeId, token)
+      setSnackbar({
+        open: true,
+        message: "Successfully joined the challenge!",
+        severity: "success",
+      })
+      fetchAll()
+      fetchJoined()
+    } catch (err) {
+      console.error("Join challenge failed:", err)
+      const message =
+        err?.response?.data?.message || "Unable to join challenge"
+      if (err?.response?.status === 401) {
+        localStorage.removeItem("token")
+        navigate("/login")
+        return
+      }
+      setSnackbar({
+        open: true,
+        message,
+        severity: "error",
+      })
+    }
   }
 
   // Handle tab change and persist selected tab

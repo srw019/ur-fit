@@ -1,6 +1,8 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material"
+import { AppBar, Toolbar, Typography, Box, Button, Badge, IconButton } from "@mui/material"
+import NotificationsIcon from "@mui/icons-material/Notifications"
+import { getUserInvitations } from "../services/api"
 
 /**
  * Navbar Component
@@ -9,6 +11,21 @@ import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material"
 
 const Navbar = ({ user, onLogout }) => {
   const location = useLocation()
+  const [pendingCount, setPendingCount] = useState(0)
+  const token = localStorage.getItem("token")
+
+  useEffect(() => {
+    if (!token || !user || user.role !== "participant") return
+    let mounted = true
+    getUserInvitations(token)
+      .then((res) => {
+        if (!mounted) return
+        const pending = Array.isArray(res.data) ? res.data.filter((i) => i.status === "pending").length : 0
+        setPendingCount(pending)
+      })
+      .catch(() => {})
+    return () => (mounted = false)
+  }, [token, user])
 
   return (
     <AppBar
@@ -46,6 +63,17 @@ const Navbar = ({ user, onLogout }) => {
               <Typography>Enrollment</Typography>
             </Link>
           )}
+          {/* Notifications for participants */}
+          {user && user.role === "participant" && (
+            <Link to="/invitations" style={{ color: "inherit" }}>
+              <IconButton size="large" aria-label="notifications">
+                <Badge badgeContent={pendingCount} color="error">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+            </Link>
+          )}
+
           {/* Auth buttons: Logout for logged-in, Sign In/Sign Up for guests */}
           {user ? (
             // Logout button for authenticated users

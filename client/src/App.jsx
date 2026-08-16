@@ -8,6 +8,7 @@ import CoordinatorChallenges from "./pages/CoordinatorChallenges"
 import ChallengeDetails from "./pages/ChallengeDetails"
 import CoordinatorManageChallenge from "./pages/CoordinatorManageChallenge"
 import EnrollUser from "./pages/EnrollUser"
+import Invitations from "./pages/Invitations"
 
 /**
  * App.jsx
@@ -42,6 +43,8 @@ const App = () => {
         />
         {/* Coordinator: Enroll users in challenges */}
         <Route path="/enrollment" element={<EnrollUser />} />
+        {/* Participant: Invitations */}
+        <Route path="/invitations" element={<Invitations />} />
       </Routes>
     </Router>
   )

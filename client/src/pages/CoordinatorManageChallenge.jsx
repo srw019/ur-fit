@@ -16,8 +16,12 @@ import {
   DialogActions,
 } from "@mui/material"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
+import EmailIcon from "@mui/icons-material/Email"
+import IconButton from "@mui/material/IconButton"
+
 import {
   getChallengeById,
+  getChallengeLeaderboard,
   updateSingleChallengeLink,
   updateSingleChallengePdf,
   addChallengeLink,
@@ -44,6 +48,9 @@ const CoordinatorManageChallenge = () => {
   const token = localStorage.getItem("token")
   let user = null
   const [editMode, setEditMode] = useState(false)
+  const [leaderboard, setLeaderboard] = useState([])
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false)
+
   const [editFields, setEditFields] = useState({
     title: "",
     description: "",
@@ -114,6 +121,37 @@ const CoordinatorManageChallenge = () => {
     }
   }, [challenge])
 
+  // Load starred set from localStorage for this viewer and challenge
+  useEffect(() => {
+    const viewerId = user?.userId || user?.id || user?._id
+    if (!id || !viewerId) return
+    try {
+      const key = `starred:${id}:${viewerId}`
+      const raw = localStorage.getItem(key)
+      if (raw) {
+        const arr = JSON.parse(raw)
+        setStarred(new Set(Array.isArray(arr) ? arr : []))
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [id, user])
+
+  const toggleStar = (studentId) => {
+    const viewerId = user?.userId || user?.id || user?._id
+    if (!viewerId) return
+    const key = `starred:${id}:${viewerId}`
+    const next = new Set(starred)
+    if (next.has(studentId)) next.delete(studentId)
+    else next.add(studentId)
+    setStarred(next)
+    try {
+      localStorage.setItem(key, JSON.stringify(Array.from(next)))
+    } catch (e) {
+      // ignore
+    }
+  }
+
   // Redirect to login if not authenticated or not a coordinator
   useEffect(() => {
     if (!token) {
@@ -145,6 +183,24 @@ const CoordinatorManageChallenge = () => {
     }
     fetchChallenge()
   }, [id, token])
+
+  const refreshLeaderboard = async () => {
+    setLeaderboardLoading(true)
+    try {
+      const leaderboardResponse = await getChallengeLeaderboard(id, token)
+      setLeaderboard(leaderboardResponse.data)
+    } catch (leaderboardErr) {
+      console.error("Error fetching leaderboard:", leaderboardErr)
+      setLeaderboard([])
+    }
+    setLeaderboardLoading(false)
+  }
+
+  useEffect(() => {
+    if (challenge) {
+      refreshLeaderboard()
+    }
+  }, [challenge])
 
   // Logout handler
   const handleLogout = () => {
@@ -377,6 +433,83 @@ const CoordinatorManageChallenge = () => {
               </>
             )}
           </Box>
+        </Box>
+        <Box mt={4}>
+          <Divider sx={{ mb: 2 }} />
+          <Typography variant="h6" fontWeight={700} gutterBottom>
+            Challenge Leaderboard
+          </Typography>
+          {leaderboardLoading ? (
+            <Typography variant="body2" color="text.secondary">
+              Loading leaderboard...
+            </Typography>
+          ) : leaderboard.length > 0 ? (
+            <Box
+              sx={{
+                border: "1px solid #e0e0e0",
+                borderRadius: 2,
+                overflow: "hidden",
+              }}
+            >
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "64px 1fr 1fr 120px",
+                  backgroundColor: "#f5f5f5",
+                  px: 2,
+                  py: 1,
+                  fontWeight: 700,
+                }}
+              >
+                <Typography>Rank</Typography>
+                <Typography>Name</Typography>
+                <Typography>Email</Typography>
+                <Typography>Points</Typography>
+              </Box>
+              {leaderboard.map((entry) => (
+                <Box
+                  key={entry.student._id}
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "64px 1fr 1fr 120px",
+                    px: 2,
+                    py: 1,
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <Typography>{entry.rank}</Typography>
+                  <Typography>{entry.student.name || "Unknown"}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {entry.student.email ? (
+                      (() => {
+                        const email = entry.student.email
+                        const subject = `Congrats on your rank in ${challenge.title}`
+                        const body = `Hi ${entry.student.name || ''},\n\nCongratulations on finishing #${entry.rank} in \"${challenge.title}\".\n\nBest regards,\n${user?.name || ''}`
+                        const href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+                        return (
+                          <>
+                            <Typography component="a" href={href} sx={{ color: 'text.secondary', textDecoration: 'none' }}>
+                              {email}
+                            </Typography>
+                            <IconButton aria-label={`email-${entry.student._id}`} href={href} size="small">
+                              <EmailIcon fontSize="small" />
+                            </IconButton>
+                          </>
+                        )
+                      })()
+                    ) : (
+                      <Typography sx={{ color: "text.secondary" }}>-</Typography>
+                    )}
+                  </Box>
+                  <Typography>{entry.totalPoints}</Typography>
+                </Box>
+              ))}
+            </Box>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              No leaderboard entries yet.
+            </Typography>
+          )}
         </Box>
         {/* Bottom: Editable lists for links and PDFs */}
         <Box
