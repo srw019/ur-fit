@@ -584,7 +584,7 @@ const ChallengeDetails = () => {
                 disabled={!userHasJoinedChallenge || hasLoggedToday || submitLoading}
               />
               <TextField
-                label="Notes (optional — how you did)"
+                label="Notes (how did you do?)"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 fullWidth
