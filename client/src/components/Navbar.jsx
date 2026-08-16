@@ -37,12 +37,12 @@ const Navbar = ({ user, onLogout }) => {
         boxShadow: "none",
       }}
     >
-      <Toolbar sx={{ justifyContent: "space-between" }}>
+      <Toolbar sx={{ justifyContent: "space-between", flexDirection: { xs: 'column', md: 'row' }, alignItems: { xs: 'flex-start', md: 'center' }, gap: { xs: 1, md: 0 } }}>
         {/* App title */}
-        <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+        <Typography variant="h5" sx={{ fontWeight: "bold", fontSize: { xs: '1.1rem', md: '1.5rem' } }}>
           UR Fit
         </Typography>
-        <Box sx={{ display: "flex", gap: "24px", alignItems: "center" }}>
+        <Box sx={{ display: "flex", gap: { xs: 1, sm: 2, md: '24px' }, alignItems: "center", flexWrap: 'wrap' }}>
           {/* Home link */}
           <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
             <Typography>Home</Typography>

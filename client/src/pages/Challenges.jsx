@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { jwtDecode } from "jwt-decode"
 import { useNavigate } from "react-router-dom"
-import { CircularProgress, Container, Tabs, Tab } from "@mui/material"
+import { CircularProgress, Container, Tabs, Tab, Box } from "@mui/material"
 import Navbar from "../components/Navbar"
 import {
   getAllChallenges,
@@ -189,14 +189,7 @@ const Challenges = () => {
           Welcome to UR Fit, {user?.name || "User"}!
         </p>
         {/* Search bar and view toggle button */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "16px",
-          }}
-        >
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: 'center', gap: 2, marginBottom: '16px' }}>
           <input
             type="text"
             placeholder="Search challenges..."
@@ -207,8 +200,8 @@ const Challenges = () => {
               fontSize: "16px",
               border: "1px solid #ccc",
               borderRadius: "4px",
-              width: "300px",
-              marginRight: "16px",
+              width: "100%",
+              maxWidth: "300px",
             }}
           />
 
@@ -227,7 +220,7 @@ const Challenges = () => {
           >
             {useExpandedView ? "Card View" : "Detailed View"}
           </button>
-        </div>
+        </Box>
 
         {/* Tabs for All Challenges and My Challenges */}
         <Tabs

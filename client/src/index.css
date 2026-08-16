@@ -6,3 +6,20 @@ body {
 code {
   font-family: monospace;
 }
+
+/* Responsive tweaks for expanded challenge card */
+.expanded-card {
+  display: flex;
+}
+
+@media (max-width: 600px) {
+  .expanded-card {
+    flex-direction: column !important;
+    height: auto !important;
+  }
+  .expanded-card-image {
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: 180px !important;
+  }
+}

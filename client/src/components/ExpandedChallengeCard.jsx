@@ -36,6 +36,7 @@ const ExpandedChallengeCard = ({
   }
   return (
     <div
+      className="expanded-card"
       style={{
         display: "flex",
         width: "100%",
@@ -173,6 +174,7 @@ const ExpandedChallengeCard = ({
           justifyContent: "center",
           overflow: "hidden",
         }}
+        className="expanded-card-image"
       >
         {/* Challenge image or fallback text */}
         {challenge.imageUrl ? (

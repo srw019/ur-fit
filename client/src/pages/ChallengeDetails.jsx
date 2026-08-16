@@ -399,7 +399,7 @@ const ChallengeDetails = () => {
         <Box
           display="grid"
           gridTemplateAreas={`"image details"`}
-          gridTemplateColumns="1fr 2fr"
+          gridTemplateColumns={{ xs: '1fr', md: '1fr 2fr' }}
           gap={4}
           alignItems="center"
         >
@@ -442,7 +442,7 @@ const ChallengeDetails = () => {
         {/* Bottom: Links and PDFs side by side */}
         <Box
           display="grid"
-          gridTemplateColumns="1fr 1fr"
+          gridTemplateColumns={{ xs: '1fr', md: '1fr 1fr' }}
           gridTemplateAreas={`"links pdfs"`}
           gap={4}
           mt={4}
@@ -646,7 +646,7 @@ const ChallengeDetails = () => {
                 <Box
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: "64px 40px 1fr 120px",
+                    gridTemplateColumns: { xs: '64px 40px 1fr', md: '64px 40px 1fr 120px' },
                     backgroundColor: "#f5f5f5",
                     px: 2,
                     py: 1,
@@ -656,7 +656,7 @@ const ChallengeDetails = () => {
                   <Typography>Rank</Typography>
                   <Typography />
                   <Typography>Name</Typography>
-                  <Typography>Points</Typography>
+                  <Typography sx={{ display: { xs: 'none', md: 'block' } }}>Points</Typography>
                 </Box>
 
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', px: 2, py: 1 }}>
@@ -691,11 +691,12 @@ const ChallengeDetails = () => {
                         key={entry.student._id}
                         sx={{
                           display: "grid",
-                          gridTemplateColumns: "64px 40px 1fr 120px",
+                          gridTemplateColumns: { xs: '64px 40px 1fr', md: '64px 40px 1fr 120px' },
                           px: 2,
                           py: 1,
                           backgroundColor: isCurrent ? "rgba(25, 118, 210, 0.08)" : (isStarred ? "#fff8e1" : "#fff"),
                           borderLeft: isStarred ? "4px solid #ffd54f" : 'none',
+                          alignItems: 'center'
                         }}
                       >
                         <Typography>{entry.rank}</Typography>
@@ -703,7 +704,7 @@ const ChallengeDetails = () => {
                           {isStarred ? <StarIcon sx={{ color: '#ffb300' }} fontSize="small" /> : <StarBorderIcon fontSize="small" />}
                         </IconButton>
                         <Typography>{entry.student.name || "Unknown"}</Typography>
-                        <Typography>{entry.totalPoints}</Typography>
+                        <Typography sx={{ display: { xs: 'none', md: 'block' } }}>{entry.totalPoints}</Typography>
                       </Box>
                     )
                   })

@@ -265,7 +265,7 @@ const CoordinatorManageChallenge = () => {
         <Box
           display="grid"
           gridTemplateAreas={`"image details"`}
-          gridTemplateColumns="1fr 2fr"
+          gridTemplateColumns={{ xs: '1fr', md: '1fr 2fr' }}
           gap={4}
           alignItems="center"
         >
@@ -454,7 +454,7 @@ const CoordinatorManageChallenge = () => {
               <Box
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: "64px 1fr 1fr 120px",
+                  gridTemplateColumns: { xs: '64px 1fr 120px', md: '64px 1fr 1fr 120px' },
                   backgroundColor: "#f5f5f5",
                   px: 2,
                   py: 1,
@@ -463,7 +463,7 @@ const CoordinatorManageChallenge = () => {
               >
                 <Typography>Rank</Typography>
                 <Typography>Name</Typography>
-                <Typography>Email</Typography>
+                <Typography sx={{ display: { xs: 'none', md: 'block' } }}>Email</Typography>
                 <Typography>Points</Typography>
               </Box>
               {leaderboard.map((entry) => (
@@ -471,34 +471,35 @@ const CoordinatorManageChallenge = () => {
                   key={entry.student._id}
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: "64px 1fr 1fr 120px",
+                    gridTemplateColumns: { xs: '64px 1fr 120px', md: '64px 1fr 1fr 120px' },
                     px: 2,
                     py: 1,
                     backgroundColor: "#fff",
+                    alignItems: 'center'
                   }}
                 >
                   <Typography>{entry.rank}</Typography>
                   <Typography>{entry.student.name || "Unknown"}</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
                     {entry.student.email ? (
                       (() => {
                         const email = entry.student.email
                         const subject = `Congrats on your rank in ${challenge.title}`
-                        const body = `Hi ${entry.student.name || ''},\n\nCongratulations on finishing #${entry.rank} in \"${challenge.title}\".\n\nBest regards,\n${user?.name || ''}`
+                        const body = `Hi ${entry.student.name || ''},\n\nCongratulations on finishing #${entry.rank} in "${challenge.title}".\n\nBest regards,\n${user?.name || ''}`
                         const href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
                         return (
                           <>
-                            <Typography component="a" href={href} sx={{ color: 'text.secondary', textDecoration: 'none' }}>
+                            <Typography component="a" href={href} sx={{ color: 'text.secondary', textDecoration: 'none', display: { xs: 'none', md: 'block' } }}>
                               {email}
                             </Typography>
-                            <IconButton aria-label={`email-${entry.student._id}`} href={href} size="small">
+                            <IconButton aria-label={`email-${entry.student._id}`} href={href} size="small" sx={{ display: { xs: 'none', md: 'inline-flex' } }}>
                               <EmailIcon fontSize="small" />
                             </IconButton>
                           </>
                         )
                       })()
                     ) : (
-                      <Typography sx={{ color: "text.secondary" }}>-</Typography>
+                      <Typography sx={{ color: "text.secondary", display: { xs: 'none', md: 'block' } }}>-</Typography>
                     )}
                   </Box>
                   <Typography>{entry.totalPoints}</Typography>
@@ -514,7 +515,7 @@ const CoordinatorManageChallenge = () => {
         {/* Bottom: Editable lists for links and PDFs */}
         <Box
           display="grid"
-          gridTemplateColumns="1fr 1fr"
+          gridTemplateColumns={{ xs: '1fr', md: '1fr 1fr' }}
           gridTemplateAreas={`"links pdfs"`}
           gap={4}
           mt={4}
