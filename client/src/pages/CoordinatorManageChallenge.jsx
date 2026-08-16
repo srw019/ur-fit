@@ -34,12 +34,7 @@ import {
 import EditableList from "../components/EditableList"
 import Navbar from "../components/Navbar"
 
-/**
- * CoordinatorManageChallenge Page
- * -------------------------------
- * Allows coordinators to view, edit, and manage a single challenge.
- */
-
+// Coordinator page to manage challenge details, edit info, and view leaderboard
 const CoordinatorManageChallenge = () => {
   const { id } = useParams()
   const [challenge, setChallenge] = useState(null)
@@ -60,7 +55,7 @@ const CoordinatorManageChallenge = () => {
   })
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
-  // Helper function to parse YYYY-MM-DD string as local date (not UTC)
+  // parse date string to local date
   const parseLocalDate = (dateString) => {
     if (!dateString) return null
     // Extract just the date part (YYYY-MM-DD) from ISO string if needed
@@ -69,7 +64,7 @@ const CoordinatorManageChallenge = () => {
     return new Date(year, month - 1, day)
   }
 
-  // Helper function to format date to YYYY-MM-DD
+  // format date nicely
   const formatDate = (dateString) => {
     if (!dateString) return ""
     const date = parseLocalDate(dateString)
@@ -81,7 +76,7 @@ const CoordinatorManageChallenge = () => {
     })
   }
 
-  // Helper function to get YYYY-MM-DD format for input field
+  // get date in input field format
   const getDateInputFormat = (dateString) => {
     if (!dateString) return ""
     const date = parseLocalDate(dateString)
@@ -92,7 +87,7 @@ const CoordinatorManageChallenge = () => {
     return `${year}-${month}-${day}`
   }
 
-  // Helper function to get today's date in YYYY-MM-DD format
+  // get today's date
   const getTodayDate = () => {
     const today = new Date()
     const year = today.getFullYear()
@@ -101,14 +96,14 @@ const CoordinatorManageChallenge = () => {
     return `${year}-${month}-${day}`
   }
 
-  // Decode user from JWT token if available
+  // decode user from token
   try {
     if (token) user = jwtDecode(token)
   } catch {
     user = null
   }
 
-  // When challenge loads, set edit fields for editing
+  // set edit fields when challenge loads
   useEffect(() => {
     if (challenge) {
       setEditFields({
@@ -121,7 +116,7 @@ const CoordinatorManageChallenge = () => {
     }
   }, [challenge])
 
-  // Load starred set from localStorage for this viewer and challenge
+  // load starred from storage
   useEffect(() => {
     const viewerId = user?.userId || user?.id || user?._id
     if (!id || !viewerId) return
@@ -152,7 +147,7 @@ const CoordinatorManageChallenge = () => {
     }
   }
 
-  // Redirect to login if not authenticated or not a coordinator
+  // check auth and role
   useEffect(() => {
     if (!token) {
       navigate("/login")
@@ -168,7 +163,7 @@ const CoordinatorManageChallenge = () => {
     }
   }, [token, navigate])
 
-  // Fetch challenge data by ID
+  // load challenge
   useEffect(() => {
     const fetchChallenge = async () => {
       setLoading(true)
@@ -202,13 +197,13 @@ const CoordinatorManageChallenge = () => {
     }
   }, [challenge])
 
-  // Logout handler
+  // logout
   const handleLogout = () => {
     localStorage.removeItem("token")
     navigate("/login")
   }
 
-  // Show loading spinner while fetching data
+  // loading state
   if (loading) {
     return (
       <Box
@@ -222,7 +217,7 @@ const CoordinatorManageChallenge = () => {
     )
   }
 
-  // Show error if challenge not found
+  // not found
   if (!challenge) {
     return (
       <Box
@@ -240,9 +235,7 @@ const CoordinatorManageChallenge = () => {
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f9f9f9" }}>
-      {/* Top navigation bar */}
       <Navbar user={user} onLogout={handleLogout} />
-      {/* Back button */}
       <Box sx={{ pl: 2, pt: 2 }}>
         <Button
           startIcon={<ArrowBackIcon />}
@@ -261,15 +254,13 @@ const CoordinatorManageChallenge = () => {
         </Button>
       </Box>
       <Container sx={{ py: 6 }}>
-        {/* Top: Image and Details */}
         <Box
           display="grid"
-          gridTemplateAreas={`"image details"`}
+          gridTemplateAreas={{ xs: `"image" "details"`, md: `"image details"` }}
           gridTemplateColumns={{ xs: '1fr', md: '1fr 2fr' }}
           gap={4}
           alignItems="center"
         >
-          {/* Challenge image */}
           <Box gridArea="image" display="flex" justifyContent="center">
             {challenge.imageUrl && (
               <img
@@ -279,12 +270,9 @@ const CoordinatorManageChallenge = () => {
               />
             )}
           </Box>
-
-          {/* Challenge details and edit mode */}
           <Box gridArea="details">
             {editMode ? (
               <>
-                {/* Edit fields for title, description, long description */}
                 <TextField
                   label="Title"
                   value={editFields.title}
@@ -354,7 +342,6 @@ const CoordinatorManageChallenge = () => {
                   InputLabelProps={{ shrink: true }}
                   sx={{ mb: 2 }}
                 />
-                {/* Save and Cancel buttons */}
                 <Button
                   variant="contained"
                   sx={{ mr: 2, backgroundColor: "#000" }}
@@ -380,7 +367,6 @@ const CoordinatorManageChallenge = () => {
               </>
             ) : (
               <>
-                {/* Challenge title, description, long description */}
                 <Typography variant="h4" fontWeight={700} gutterBottom>
                   {challenge.title}
                 </Typography>
@@ -395,7 +381,6 @@ const CoordinatorManageChallenge = () => {
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   {challenge.longDescription}
                 </Typography>
-                {/* Chips for dates and participant count */}
                 <Box sx={{ mb: 2 }}>
                   <Chip
                     label={`Starts: ${formatDate(challenge.startDate)}`}
@@ -408,7 +393,6 @@ const CoordinatorManageChallenge = () => {
                   <Chip label={`${challenge.participantCount} Participants`} />
                 </Box>
                 <Divider />
-                {/* Edit and Delete buttons */}
                 <Button
                   variant="outlined"
                   sx={{ mt: 2 }}
@@ -454,7 +438,7 @@ const CoordinatorManageChallenge = () => {
               <Box
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: { xs: '64px 1fr 120px', md: '64px 1fr 1fr 120px' },
+                  gridTemplateColumns: { xs: '50px 1fr 70px', md: '64px 1fr 1fr 120px' },
                   backgroundColor: "#f5f5f5",
                   px: 2,
                   py: 1,
@@ -464,23 +448,23 @@ const CoordinatorManageChallenge = () => {
                 <Typography>Rank</Typography>
                 <Typography>Name</Typography>
                 <Typography sx={{ display: { xs: 'none', md: 'block' } }}>Email</Typography>
-                <Typography>Points</Typography>
+                <Typography sx={{ textAlign: 'right' }}>Points</Typography>
               </Box>
               {leaderboard.map((entry) => (
                 <Box
                   key={entry.student._id}
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: { xs: '64px 1fr 120px', md: '64px 1fr 1fr 120px' },
+                    gridTemplateColumns: { xs: '50px 1fr 70px', md: '64px 1fr 1fr 120px' },
                     px: 2,
                     py: 1,
                     backgroundColor: "#fff",
                     alignItems: 'center'
                   }}
                 >
-                  <Typography>{entry.rank}</Typography>
-                  <Typography>{entry.student.name || "Unknown"}</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
+                  <Typography sx={{ fontSize: { xs: '0.9rem', md: '1rem' } }}>{entry.rank}</Typography>
+                  <Typography sx={{ fontSize: { xs: '0.9rem', md: '1rem' }, overflow: 'hidden', textOverflow: 'ellipsis' }}>{entry.student.name || "Unknown"}</Typography>
+                  <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
                     {entry.student.email ? (
                       (() => {
                         const email = entry.student.email
@@ -489,20 +473,20 @@ const CoordinatorManageChallenge = () => {
                         const href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
                         return (
                           <>
-                            <Typography component="a" href={href} sx={{ color: 'text.secondary', textDecoration: 'none', display: { xs: 'none', md: 'block' } }}>
+                            <Typography component="a" href={href} sx={{ color: 'text.secondary', textDecoration: 'none', display: 'block' }}>
                               {email}
                             </Typography>
-                            <IconButton aria-label={`email-${entry.student._id}`} href={href} size="small" sx={{ display: { xs: 'none', md: 'inline-flex' } }}>
+                            <IconButton aria-label={`email-${entry.student._id}`} href={href} size="small">
                               <EmailIcon fontSize="small" />
                             </IconButton>
                           </>
                         )
                       })()
                     ) : (
-                      <Typography sx={{ color: "text.secondary", display: { xs: 'none', md: 'block' } }}>-</Typography>
+                      <Typography sx={{ color: "text.secondary" }}>-</Typography>
                     )}
                   </Box>
-                  <Typography>{entry.totalPoints}</Typography>
+                  <Typography sx={{ textAlign: 'right', fontSize: { xs: '0.9rem', md: '1rem' } }}>{entry.totalPoints}</Typography>
                 </Box>
               ))}
             </Box>
@@ -512,15 +496,15 @@ const CoordinatorManageChallenge = () => {
             </Typography>
           )}
         </Box>
-        {/* Bottom: Editable lists for links and PDFs */}
         <Box
-          display="grid"
-          gridTemplateColumns={{ xs: '1fr', md: '1fr 1fr' }}
-          gridTemplateAreas={`"links pdfs"`}
-          gap={4}
-          mt={4}
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+            gridTemplateAreas: { xs: `"links" "pdfs"`, md: `"links pdfs"` },
+            gap: 4,
+            mt: 4,
+          }}
         >
-          {/* External Links editable list */}
           <Box gridArea="links">
             <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
               External Links
@@ -546,7 +530,6 @@ const CoordinatorManageChallenge = () => {
               type="link"
             />
           </Box>
-          {/* PDF Resources editable list */}
           <Box gridArea="pdfs">
             <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
               PDF Resources
@@ -574,7 +557,6 @@ const CoordinatorManageChallenge = () => {
           </Box>
         </Box>
       </Container>
-      {/* Delete confirmation dialog */}
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}

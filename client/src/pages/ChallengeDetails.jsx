@@ -25,15 +25,9 @@ import FormControlLabel from "@mui/material/FormControlLabel"
 import { getChallengeById, getChallengeLogs, getChallengeLeaderboard, submitChallengeLog, joinChallenge, leaveChallenge } from "../services/api"
 import Navbar from "../components/Navbar"
 
-/**
- * ChallengeDetails Component
- * --------------------------
- * Displays detailed information for a single challenge.
- */
-
+// View challenge details, logs, and leaderboard
 const ChallengeDetails = () => {
   const { id } = useParams()
-  // State for challenge data and loading indicator
   const [challenge, setChallenge] = useState(null)
   const [loading, setLoading] = useState(true)
   const [logs, setLogs] = useState([])
@@ -57,14 +51,14 @@ const ChallengeDetails = () => {
   const token = localStorage.getItem("token")
   let user = null
 
-  // Try to read the logged-in user from the token
+  // get user from token
   try {
     if (token) user = jwtDecode(token)
   } catch {
     user = null
   }
 
-  // If you're not logged in or not a participant, bounce to login
+  // check if participant
   useEffect(() => {
     if (!token) {
       navigate("/login")
@@ -80,7 +74,7 @@ const ChallengeDetails = () => {
     }
   }, [token, navigate])
 
-  // Load the challenge details when the page opens
+  // load challenge on mount
   useEffect(() => {
     const fetchChallenge = async () => {
       setLoading(true)
@@ -127,7 +121,7 @@ const ChallengeDetails = () => {
     fetchChallenge()
   }, [id, token])
 
-  // Load starred set from localStorage for this viewer and challenge (participant)
+  // load starred from storage
   useEffect(() => {
     if (!id || !token) return
     let decoded = null
@@ -281,7 +275,7 @@ const ChallengeDetails = () => {
     setJoinLoading(false)
   }
 
-  // Helper function to parse YYYY-MM-DD string as local date (not UTC)
+  // parse date string
   const parseLocalDate = (dateString) => {
     if (!dateString) return null
     const datePart = dateString.split('T')[0]
@@ -324,7 +318,7 @@ const ChallengeDetails = () => {
     setSubmitLoading(false)
   }
 
-  // Helper function to format date to display format
+  // format date for display
   const formatDate = (dateString) => {
     if (!dateString) return ""
     const date = parseLocalDate(dateString)
@@ -336,13 +330,13 @@ const ChallengeDetails = () => {
     })
   }
 
-  // Handle logout and redirect to login
+  // logout
   const handleLogout = () => {
     localStorage.removeItem("token")
     navigate("/login")
   }
 
-  // Show loading spinner while fetching data
+  // loading state
   if (loading) {
     return (
       <Box
@@ -356,7 +350,7 @@ const ChallengeDetails = () => {
     )
   }
 
-  // Show error if challenge not found
+  // not found
   if (!challenge) {
     return (
       <Box
@@ -374,9 +368,7 @@ const ChallengeDetails = () => {
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f9f9f9" }}>
-      {/* Top navigation bar */}
       <Navbar user={user} onLogout={handleLogout} />
-      {/* Back button */}
       <Box sx={{ pl: 2, pt: 2 }}>
         <Button
           startIcon={<ArrowBackIcon />}
@@ -395,15 +387,13 @@ const ChallengeDetails = () => {
         </Button>
       </Box>
       <Container sx={{ py: 6 }}>
-        {/* Top: Image and Details */}
         <Box
           display="grid"
-          gridTemplateAreas={`"image details"`}
+          gridTemplateAreas={{ xs: `"image" "details"`, md: `"image details"` }}
           gridTemplateColumns={{ xs: '1fr', md: '1fr 2fr' }}
           gap={4}
           alignItems="center"
         >
-          {/* Challenge image */}
           <Box gridArea="image" display="flex" justifyContent="center">
             {challenge.imageUrl && (
               <img
@@ -413,7 +403,6 @@ const ChallengeDetails = () => {
               />
             )}
           </Box>
-          {/* Challenge details */}
           <Box gridArea="details">
             <Typography variant="h5" fontWeight={700} gutterBottom>
               {challenge.title}
@@ -439,15 +428,13 @@ const ChallengeDetails = () => {
             </Box>
           </Box>
         </Box>
-        {/* Bottom: Links and PDFs side by side */}
         <Box
           display="grid"
           gridTemplateColumns={{ xs: '1fr', md: '1fr 1fr' }}
-          gridTemplateAreas={`"links pdfs"`}
+          gridTemplateAreas={`"links" "pdfs"`}
           gap={4}
           mt={4}
         >
-          {/* External Links section */}
           <Box gridArea="links">
             <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
               External Links
@@ -478,7 +465,6 @@ const ChallengeDetails = () => {
               </Typography>
             )}
           </Box>
-          {/* PDF Resources section */}
           <Box gridArea="pdfs">
             <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2 }}>
               PDF Resources
@@ -513,22 +499,11 @@ const ChallengeDetails = () => {
           </Box>
         </Box>
         <Container sx={{ py: 4 }}>
-          <Box
-            sx={{
-              p: 4,
-              backgroundColor: "#fff",
-              borderRadius: 2,
-              boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
-            }}
-          >
+          <Box sx={{ p: 4, backgroundColor: "#fff", borderRadius: 2, boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}>
             <Box display="flex" justifyContent="space-between" alignItems="center">
               <Box>
-                <Typography variant="h6" fontWeight={700} gutterBottom>
-                  Daily Activity Log
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Each successful log awards {challenge.pointsPerLog ?? 0} points.
-                </Typography>
+                <Typography variant="h6" fontWeight={700} gutterBottom>Daily Activity Log</Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>Each log awards {challenge.pointsPerLog ?? 0} points</Typography>
               </Box>
               <Box>
                 {userHasJoinedChallenge ? (
@@ -627,9 +602,7 @@ const ChallengeDetails = () => {
             )}
             <Box mt={4}>
               <Divider sx={{ mb: 2 }} />
-              <Typography variant="h6" fontWeight={700} gutterBottom>
-                Challenge Leaderboard
-              </Typography>
+              <Typography variant="h6" fontWeight={700} gutterBottom>Challenge Leaderboard</Typography>
               
               {yourRank && yourRank > 1 && pointsToNext !== null && (
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -646,29 +619,31 @@ const ChallengeDetails = () => {
                 <Box
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: { xs: '64px 40px 1fr', md: '64px 40px 1fr 120px' },
-                    backgroundColor: "#f5f5f5",
-                    px: 2,
-                    py: 1,
-                    fontWeight: 700,
-                  }}
-                >
-                  <Typography>Rank</Typography>
-                  <Typography />
-                  <Typography>Name</Typography>
-                  <Typography sx={{ display: { xs: 'none', md: 'block' } }}>Points</Typography>
-                </Box>
+                  gridTemplateColumns: { xs: '50px 40px 1fr 70px', md: '64px 40px 1fr 120px' },
+                  backgroundColor: "#f5f5f5",
+                  px: 2,
+                  py: 1,
+                  fontWeight: 700,
+                }}
+              >
+                <Typography>Rank</Typography>
+                <Typography />
+                <Typography>Name</Typography>
+                <Typography sx={{ textAlign: 'right' }}>Points</Typography>
+              </Box>
 
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', px: 2, py: 1 }}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', px: 2, py: 1, flexWrap: 'wrap' }}>
                   <TextField
                     size="small"
                     placeholder="Search name"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    sx={{ flex: { xs: '1 1 100%', sm: '1 1 auto' }, minWidth: '150px' }}
                   />
                   <FormControlLabel
                     control={<Switch checked={showStarredOnly} onChange={(e) => setShowStarredOnly(e.target.checked)} />}
-                    label="Show starred only"
+                    label="Starred"
+                    sx={{ whiteSpace: 'nowrap' }}
                   />
                 </Box>
 
@@ -691,7 +666,7 @@ const ChallengeDetails = () => {
                         key={entry.student._id}
                         sx={{
                           display: "grid",
-                          gridTemplateColumns: { xs: '64px 40px 1fr', md: '64px 40px 1fr 120px' },
+                          gridTemplateColumns: { xs: '50px 40px 1fr 70px', md: '64px 40px 1fr 120px' },
                           px: 2,
                           py: 1,
                           backgroundColor: isCurrent ? "rgba(25, 118, 210, 0.08)" : (isStarred ? "#fff8e1" : "#fff"),
@@ -699,19 +674,18 @@ const ChallengeDetails = () => {
                           alignItems: 'center'
                         }}
                       >
-                        <Typography>{entry.rank}</Typography>
+                        <Typography sx={{ fontSize: { xs: '0.9rem', md: '1rem' } }}>{entry.rank}</Typography>
                         <IconButton onClick={() => toggleStar(entry.student._id)} size="small" aria-label={`star-${entry.student._id}`}>
                           {isStarred ? <StarIcon sx={{ color: '#ffb300' }} fontSize="small" /> : <StarBorderIcon fontSize="small" />}
                         </IconButton>
-                        <Typography>{entry.student.name || "Unknown"}</Typography>
-                        <Typography sx={{ display: { xs: 'none', md: 'block' } }}>{entry.totalPoints}</Typography>
+                        <Typography sx={{ fontSize: { xs: '0.9rem', md: '1rem' }, overflow: 'hidden', textOverflow: 'ellipsis' }}>{entry.student.name || "Unknown"}</Typography>
+                        <Typography sx={{ textAlign: 'right', fontSize: { xs: '0.9rem', md: '1rem' } }}>{entry.totalPoints}</Typography>
                       </Box>
                     )
                   })
                 })()}
               </Box>
             </Box>
-            {/* Leave confirmation dialog */}
             <Dialog open={leaveConfirmOpen} onClose={handleCloseLeave}>
               <DialogTitle>Leave challenge?</DialogTitle>
               <DialogContent>

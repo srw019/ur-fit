@@ -103,11 +103,13 @@ const CoordinatorChallenges = () => {
           Coordinator Dashboard
         </Typography>
         {/* Search bar and Create Challenge button */}
-        <div
-          style={{
+        <Box
+          sx={{
             display: "flex",
-            justifyContent: "space-between",
+            flexDirection: { xs: "column", md: "row" },
+            justifyContent: { xs: "center", md: "space-between" },
             alignItems: "center",
+            gap: 2,
             marginBottom: "32px",
           }}
         >
@@ -121,18 +123,18 @@ const CoordinatorChallenges = () => {
               fontSize: "16px",
               border: "1px solid #ccc",
               borderRadius: "4px",
-              width: "300px",
-              marginRight: "16px",
+              width: "100%",
+              maxWidth: "300px",
             }}
           />
           <Button
             variant="contained"
             onClick={() => setModalOpen(true)}
-            style={{ backgroundColor: "#000" }}
+            style={{ backgroundColor: "#000", width: "100%", maxWidth: "300px" }}
           >
             Create New Challenge
           </Button>
-        </div>
+        </Box>
 
         {/* Loading spinner, empty state, or challenges grid */}
         {loading ? (
